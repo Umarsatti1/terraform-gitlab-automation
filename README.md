@@ -4,7 +4,7 @@ This guide provides step-by-step instructions for automating AWS infrastructure 
 
 ---
 
-## 🧱 Step 1: Clone Basic AWS Infrastructure
+## Step 1: Clone Basic AWS Infrastructure
 
 Clone the starter infrastructure template from GitHub:
 
@@ -15,17 +15,17 @@ cd basic-terraform-infra
 
 ---
 
-## 🗃️ Step 2: Configure Terraform Backend
+## Step 2: Configure Terraform Backend
 
 Terraform uses a backend to store the state file and lock the state during changes. We'll use **S3** and **DynamoDB**.
 
-### 📁 Step 2.1: Navigate to the Backend Folder
+### Step 2.1: Navigate to the Backend Folder
 
 ```bash
 cd backend
 ```
 
-### 🪣 Step 2.2: Deploy S3 Bucket and DynamoDB Table
+### Step 2.2: Deploy S3 Bucket and DynamoDB Table
 
 The backend folder already contains the code for backend resources.
 
@@ -38,7 +38,7 @@ terraform apply -auto-approve
 
 ---
 
-## 📂 Step 3: Push the Project to GitLab
+## Step 3: Push the Project to GitLab
 
 1. Create a **new repository** on GitLab.
 2. Push the local project:
@@ -51,7 +51,7 @@ git push -u origin main
 
 ---
 
-## ⚙️ Step 4: Add GitLab CI/CD Pipeline
+## Step 4: Add GitLab CI/CD Pipeline
 
 Add a `.gitlab-ci.yml` file to the root of your repository with the following content:
 
@@ -107,7 +107,7 @@ destroy:
 
 ---
 
-## 🔐 Step 5: Set GitLab CI/CD Environment Variables
+## Step 5: Set GitLab CI/CD Environment Variables
 
 Navigate to your GitLab repository ➝ **Settings** ➝ **CI/CD** ➝ **Variables**:
 
@@ -116,7 +116,7 @@ Navigate to your GitLab repository ➝ **Settings** ➝ **CI/CD** ➝ **Variable
 
 ---
 
-## 🚦 Step 6: Apply Code Changes and Run Pipeline
+## Step 6: Apply Code Changes and Run Pipeline
 
 After committing changes, GitLab will trigger the pipeline automatically.
 
@@ -124,7 +124,7 @@ To apply or destroy infrastructure, **manually trigger** the respective jobs (`a
 
 ---
 
-## ✅ Additional Notes
+## Additional Notes
 
 - Always ensure backend resources (S3/DynamoDB) are deployed before initializing Terraform.
 - Use branches for safer workflow and avoid applying changes directly on `main` unless intended.
