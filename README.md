@@ -1,4 +1,4 @@
-# 🚀 Automating AWS Infrastructure Deployment using Terraform and GitLab
+# Automating AWS Infrastructure Deployment using Terraform and GitLab
 
 This guide provides step-by-step instructions for automating AWS infrastructure deployment using **Terraform** and **GitLab CI/CD**.
 
