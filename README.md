@@ -1,95 +1,132 @@
-<<<<<<< HEAD
-# terraform-gitlab-automation
+# 🚀 Automating AWS Infrastructure Deployment using Terraform and GitLab
 
+This guide provides step-by-step instructions for automating AWS infrastructure deployment using **Terraform** and **GitLab CI/CD**.
 
+---
 
-## Getting started
+## 🧱 Step 1: Clone Basic AWS Infrastructure
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+Clone the starter infrastructure template from GitHub:
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
-
-## Add your files
-
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
-
+```bash
+git clone https://github.com/Umarsatti1/basic-terraform-infra.git
+cd basic-terraform-infra
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/umarsatti/terraform-gitlab-automation.git
+
+---
+
+## 🗃️ Step 2: Configure Terraform Backend
+
+Terraform uses a backend to store the state file and lock the state during changes. We'll use **S3** and **DynamoDB**.
+
+### 📁 Step 2.1: Navigate to the Backend Folder
+
+```bash
+cd backend
+```
+
+### 🪣 Step 2.2: Deploy S3 Bucket and DynamoDB Table
+
+The backend folder already contains the code for backend resources.
+
+```bash
+terraform init
+terraform validate
+terraform plan
+terraform apply -auto-approve
+```
+
+---
+
+## 📂 Step 3: Push the Project to GitLab
+
+1. Create a **new repository** on GitLab.
+2. Push the local project:
+
+```bash
+git remote add origin https://gitlab.com/your-username/your-repo.git
 git branch -M main
-git push -uf origin main
+git push -u origin main
 ```
 
-## Integrate with your tools
+---
 
-- [ ] [Set up project integrations](https://gitlab.com/umarsatti/terraform-gitlab-automation/-/settings/integrations)
+## ⚙️ Step 4: Add GitLab CI/CD Pipeline
 
-## Collaborate with your team
+Add a `.gitlab-ci.yml` file to the root of your repository with the following content:
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+```yaml
+image:
+  name: hashicorp/terraform:light
+  entrypoint:
+    - '/usr/bin/env'
+    - 'PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin'
 
-## Test and Deploy
+before_script:
+  - export AWS_ACCESS_KEY=${AWS_ACCESS_KEY_ID}
+  - export AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+  - ssh-keygen -t rsa -b 2048 -f tf-key-pair -N ""
+  - terraform --version
+  - terraform init
 
-Use the built-in continuous integration in GitLab.
+stages:
+  - validate
+  - plan
+  - apply
+  - destroy
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+validate:
+  stage: validate
+  script:
+    - terraform validate
 
-***
+plan:
+  stage: plan
+  dependencies:
+    - validate
+  script:
+    - terraform plan -out "planfile"
+  artifacts:
+    paths:
+      - planfile
 
-# Editing this README
+apply:
+  stage: apply
+  dependencies:
+    - plan
+  script:
+    - terraform apply -auto-approve
+  when: manual
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+destroy:
+  stage: destroy
+  script:
+    - terraform destroy -auto-approve
+  when: manual
+```
 
-## Suggestions for a good README
+---
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+## 🔐 Step 5: Set GitLab CI/CD Environment Variables
 
-## Name
-Choose a self-explaining name for your project.
+Navigate to your GitLab repository ➝ **Settings** ➝ **CI/CD** ➝ **Variables**:
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+- `AWS_ACCESS_KEY_ID`: Your AWS Access Key
+- `AWS_SECRET_ACCESS_KEY`: Your AWS Secret Key
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+---
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+## 🚦 Step 6: Apply Code Changes and Run Pipeline
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+After committing changes, GitLab will trigger the pipeline automatically.
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+To apply or destroy infrastructure, **manually trigger** the respective jobs (`apply` or `destroy`) from the pipeline UI.
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+---
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+## ✅ Additional Notes
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+- Always ensure backend resources (S3/DynamoDB) are deployed before initializing Terraform.
+- Use branches for safer workflow and avoid applying changes directly on `main` unless intended.
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
-=======
+---
